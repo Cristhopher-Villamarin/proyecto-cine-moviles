@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'pantalla_confirmacion.dart'; // Importa la pantalla de confirmación.
 
 class PantallaAsientos extends StatefulWidget {
   final String peliculaId;
   final String titulo;
+  final double precio;
+  final String fechaSeleccionada; // 📌 Nuevo: Fecha seleccionada
+  final String horaSeleccionada;  // 📌 Nuevo: Hora seleccionada
 
-  const PantallaAsientos({Key? key, required this.peliculaId, required this.titulo}) : super(key: key);
+  const PantallaAsientos({
+    Key? key,
+    required this.peliculaId,
+    required this.titulo,
+    required this.precio,
+    required this.fechaSeleccionada, // 📌 Se añade como requerido
+    required this.horaSeleccionada,  // 📌 Se añade como requerido
+  }) : super(key: key);
 
   @override
   _PantallaAsientosState createState() => _PantallaAsientosState();
@@ -15,6 +24,7 @@ class PantallaAsientos extends StatefulWidget {
 class _PantallaAsientosState extends State<PantallaAsientos> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<String> _asientosSeleccionados = [];
+  double _totalPago = 0.0;
 
   void _toggleAsiento(String asientoId) {
     setState(() {
@@ -23,6 +33,7 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
       } else {
         _asientosSeleccionados.add(asientoId);
       }
+      _totalPago = _asientosSeleccionados.length * widget.precio;
     });
   }
 
@@ -34,21 +45,27 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
       return;
     }
 
-    // Marcar los asientos como ocupados en Firestore
     for (String asiento in _asientosSeleccionados) {
-      await _firestore.collection("asientos").doc(asiento).update({"estado": "ocupado"});
+      await _firestore
+          .collection("peliculas")
+          .doc(widget.peliculaId)
+          .collection("fechas_disponibles")
+          .doc(widget.fechaSeleccionada)
+          .collection("horarios")
+          .doc(widget.horaSeleccionada)
+          .collection("asientos")
+          .doc(asiento)
+          .update({"estado": "ocupado"});
     }
 
-    // Navegar a la pantalla de confirmación
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PantallaConfirmacion(
-          peliculaTitulo: widget.titulo,
-          asientos: _asientosSeleccionados,
-        ),
-      ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Reserva confirmada")),
     );
+
+    setState(() {
+      _asientosSeleccionados.clear();
+      _totalPago = 0.0;
+    });
   }
 
   @override
@@ -60,17 +77,36 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 10),
-          Text(
-            "Selecciona tus asientos",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          SizedBox(height: 20),
+
+          // 🔹 Representación de la pantalla del cine
+          Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              "PANTALLA",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
-          SizedBox(height: 10),
+
+          SizedBox(height: 20),
+
+          // 🔹 Muestra los asientos organizados por filas
           Expanded(
             child: StreamBuilder(
               stream: _firestore
+                  .collection("peliculas")
+                  .doc(widget.peliculaId)
+                  .collection("fechas_disponibles")
+                  .doc(widget.fechaSeleccionada)
+                  .collection("horarios")
+                  .doc(widget.horaSeleccionada)
                   .collection("asientos")
-                  .where("peliculaId", isEqualTo: widget.peliculaId)
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
@@ -79,60 +115,76 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
 
                 var asientos = snapshot.data!.docs;
 
-                return GridView.builder(
-                  padding: EdgeInsets.all(10),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 8, // Número de asientos por fila
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 5,
-                    mainAxisSpacing: 5,
-                  ),
-                  itemCount: asientos.length,
-                  itemBuilder: (context, index) {
-                    var asiento = asientos[index];
-                    bool esOcupado = asiento["estado"] == "ocupado";
-                    bool esSeleccionado = _asientosSeleccionados.contains(asiento.id);
+                // 🔹 Crear la estructura de filas y columnas
+                Map<String, List<QueryDocumentSnapshot>> filas = {};
+                for (var asiento in asientos) {
+                  String fila = asiento["numero"][0]; // Obtiene la letra de la fila (Ej: "A1" -> "A")
+                  if (!filas.containsKey(fila)) {
+                    filas[fila] = [];
+                  }
+                  filas[fila]!.add(asiento);
+                }
 
-                    return GestureDetector(
-                      onTap: () {
-                        if (!esOcupado) {
-                          _toggleAsiento(asiento.id);
-                        }
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: esOcupado
-                              ? Colors.red
-                              : esSeleccionado
-                              ? Colors.green
-                              : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Center(
-                          child: Text(
-                            asiento["numero"],
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                return Column(
+                  children: filas.entries.map((entry) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: entry.value.map((asiento) {
+                        bool esOcupado = asiento["estado"] == "ocupado";
+                        bool esSeleccionado = _asientosSeleccionados.contains(asiento.id);
+
+                        return GestureDetector(
+                          onTap: () {
+                            if (!esOcupado) {
+                              _toggleAsiento(asiento.id);
+                            }
+                          },
+                          child: Container(
+                            margin: EdgeInsets.all(4),
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: esOcupado
+                                  ? Colors.red
+                                  : esSeleccionado
+                                  ? Colors.green
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Center(
+                              child: Text(
+                                asiento["numero"],
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      }).toList(),
                     );
-                  },
+                  }).toList(),
                 );
               },
             ),
           ),
-          SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: _confirmarReserva,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.indigo,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Text("Confirmar Reserva", style: TextStyle(fontSize: 16, color: Colors.white)),
+
+          SizedBox(height: 20),
+
+          // 🔹 Mostrar el total a pagar
+          Text(
+            "Total a Pagar: \$${_totalPago.toStringAsFixed(2)}",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
+
+          SizedBox(height: 10),
+
+          // 🔹 Botón para confirmar la reserva
+          FloatingActionButton.extended(
+            onPressed: _confirmarReserva,
+            label: Text("Confirmar Reserva"),
+            icon: Icon(Icons.check),
+            backgroundColor: Colors.indigo,
+          ),
+
           SizedBox(height: 20),
         ],
       ),

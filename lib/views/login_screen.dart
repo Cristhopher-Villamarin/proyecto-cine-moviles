@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => PantallaCine(username: username,),
+        builder: (context) => PantallaCine(),
       ),
     );
   }

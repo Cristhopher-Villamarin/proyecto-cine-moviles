@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'services/firestore_service.dart';
 import 'views/login_screen.dart';
 
 void main() async {
@@ -22,6 +23,8 @@ void main() async {
     // Para Android e iOS, Firebase detecta automáticamente los archivos de configuración
     await Firebase.initializeApp();
   }
+  FirestoreService firestoreService = FirestoreService();
+  await firestoreService.agregarPeliculas();
 
   runApp(MyApp());
 }
