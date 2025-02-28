@@ -7,7 +7,7 @@ class FirestoreService {
     List<Map<String, dynamic>> peliculas = [
       {
         "titulo": "Avatar 2",
-        "imagen": "https://upload.wikimedia.org/wikipedia/en/b/b0/Avatar_The_Way_of_Water_poster.jpg",
+        "imagen": "https://http2.mlstatic.com/D_NQ_NP_820377-MLU70799697688_082023-O.webp",
         "sinopsis": "Jake Sully y Ney'tiri han formado una familia y hacen todo lo posible por permanecer juntos. Sin embargo, deben abandonar su hogar y explorar las regiones de Pandora cuando una antigua amenaza reaparece.",
         "precio": 8.50,
         "duracion": "2h 30min",
@@ -53,7 +53,7 @@ class FirestoreService {
       },
       {
         "titulo": "Avengers: End Game",
-        "imagen": "https://ruta-imagen.com/spiderman.jpg",
+        "imagen": "https://es.web.img3.acsta.net/c_310_420/pictures/19/03/26/17/22/0896830.jpg",
         "sinopsis": "Después de los eventos devastadores de Avengers: Infinity War, el universo está en ruinas debido a las acciones de Thanos, el Titán Loco. Con la ayuda de los aliados que quedaron, los Vengadores deberán reunirse una vez más para intentar detenerlo y restaurar el orden en el universo de una vez por todas.",
         "precio": 4.00,
         "duracion": "3h 02min",
@@ -99,7 +99,7 @@ class FirestoreService {
       },
       {
         "titulo": "X-Men: Origins",
-        "imagen": "https://ruta-imagen.com/spiderman.jpg",
+        "imagen": "https://es.web.img3.acsta.net/pictures/16/04/14/11/28/136403.jpg",
         "sinopsis": "Nacido como mutante en 1845, Lobezno y su hermano huyen de su pueblo para inscribirse en el ejército, luchando en cada gran batalla americana. Un día son reclutados por el coronel Stryker para formar un ejército especial de mutantes. Lobezno acaba escapando e intenta seguir con una vida normal. Sin embargo, cuando descubre que Stryker le persigue se prepara para atacar de nuevo.",
         "precio": 5.00,
         "duracion": "2h 32min",
