@@ -205,9 +205,16 @@ class PagoExitosoScreen extends StatelessWidget {
         return AlertDialog(
           title: Text("Detalles de la compra"),
           content: SingleChildScrollView(
-            child: Text(
-              JsonEncoder.withIndent("  ").convert(datosQR),
-              style: TextStyle(fontFamily: 'monospace'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow("Película", datosQR["Película"]),
+                _buildDetailRow("Fecha", datosQR["Fecha"]),
+                _buildDetailRow("Hora", datosQR["Hora"]),
+                _buildDetailRow("Comprador", datosQR["Comprador"]),
+                _buildDetailRow("Asientos", datosQR["Asientos"].join(", ")),
+                _buildDetailRow("Total Pagado", "\$${datosQR["PagoTotal"]}"),
+              ],
             ),
           ),
           actions: [
@@ -218,6 +225,33 @@ class PagoExitosoScreen extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  // Función para construir una fila de detalles
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "$label: ",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
