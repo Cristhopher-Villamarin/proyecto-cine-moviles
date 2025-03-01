@@ -43,159 +43,196 @@ class _PantallaFechaHoraState extends State<PantallaFechaHora> {
       horarioSeleccionado = horario;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // 🔹 Fondo Blanco
       appBar: AppBar(
         title: Text("Seleccionar Fecha y Horario"),
-        backgroundColor: Colors.indigo, // 🔹 Azul Oscuro
+        backgroundColor: Colors.indigo,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // 🔹 Sección de Imagen y Descripción en dos columnas
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                  )
+      body: Stack(
+        children: [
+          /// Fondo degradado
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black,
+                  Color(0xFF3533CD),
                 ],
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 🔹 Imagen a la izquierda
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      widget.imagen,
-                      height: 220,
-                      width: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(width: 12), // 🔹 Espacio entre imagen y texto
+            ),
+          ),
 
-                  // 🔹 Texto a la derecha
-                  Expanded(
-                    child: Column(
+          /// Imagen PNG superpuesta como marca de agua
+          Positioned.fill(
+            child: Image.asset(
+              'assets/fondo.png',
+              fit: BoxFit.cover,
+              colorBlendMode: BlendMode.srcOver,
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
+
+          /// Contenido principal
+          SingleChildScrollView(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                /// Tarjeta con la información de la película
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          widget.titulo,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+                        /// Imagen de la película
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            widget.imagen,
+                            height: 220,
+                            width: 150,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          widget.sinopsis,
-                          textAlign: TextAlign.justify,
-                          style: TextStyle(fontSize: 14, color: Colors.black87),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Precio: \$${widget.precio}",
-                          style: TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.bold),
+                        SizedBox(width: 12),
+
+                        /// Información de la película
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.titulo,
+                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                widget.sinopsis,
+                                textAlign: TextAlign.justify,
+                                style: TextStyle(fontSize: 14, color: Colors.black87),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                "Precio: \$${widget.precio}",
+                                style: TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            SizedBox(height: 20), // 🔹 Espaciado
+                SizedBox(height: 20),
 
-            // 🔹 Selección de Fechas
-            Text("Selecciona una Fecha", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
-            StreamBuilder(
-              stream: _firestore.collection("peliculas").doc(widget.peliculaId)
-                  .collection("fechas_disponibles").snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
+                /// Selección de Fecha
+                Text(
+                  "Selecciona una Fecha",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+                ),
+                SizedBox(height: 10),
 
-                var fechas = snapshot.data!.docs;
+                StreamBuilder(
+                  stream: _firestore.collection("peliculas").doc(widget.peliculaId)
+                      .collection("fechas_disponibles").snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
-                return Wrap(
-                  spacing: 10,
-                  children: fechas.map((fecha) {
-                    var data = fecha.data() as Map<String, dynamic>;
-                    String fechaTexto = "${data["dia_letras"]} ${data["dia_numero"]} ${data["mes"]}";
+                    var fechas = snapshot.data!.docs;
 
-                    return ChoiceChip(
-                      label: Text(
-                        fechaTexto,
-                        style: TextStyle(color: fechaSeleccionada == fecha.id ? Colors.white : Colors.black),
-                      ),
-                      selectedColor: Colors.red, // 🔹 Color Rojo cuando se selecciona
-                      selected: fechaSeleccionada == fecha.id,
-                      onSelected: (_) => _seleccionarFecha(
-                          fecha.id, fechaTexto, List<String>.from(data["horarios"])
-                      ),
+                    return Wrap(
+                      spacing: 10,
+                      children: fechas.map((fecha) {
+                        var data = fecha.data() as Map<String, dynamic>;
+                        String fechaTexto = "${data["dia_letras"]} ${data["dia_numero"]} ${data["mes"]}";
+
+                        return ChoiceChip(
+                          label: Text(
+                            fechaTexto,
+                            style: TextStyle(
+                              color: fechaSeleccionada == fecha.id ? Colors.white : Colors.black,
+                            ),
+                          ),
+                          selectedColor: Colors.red,
+                          selected: fechaSeleccionada == fecha.id,
+                          onSelected: (_) => _seleccionarFecha(fecha.id, fechaTexto, List<String>.from(data["horarios"])),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
-                );
-              },
-            ),
+                  },
+                ),
 
-            SizedBox(height: 20),
+                SizedBox(height: 20),
 
-            // 🔹 Selección de Horario (solo si se ha seleccionado una fecha)
-            if (horariosDisponibles.isNotEmpty) ...[
-              Text("Selecciona un Horario", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
-              Wrap(
-                spacing: 10,
-                children: horariosDisponibles.map((horario) {
-                  return ChoiceChip(
-                    label: Text(
-                      horario,
-                      style: TextStyle(color: horarioSeleccionado == horario ? Colors.white : Colors.black),
+                /// Selección de Horario
+                if (horariosDisponibles.isNotEmpty) ...[
+                  Text(
+                    "Selecciona un Horario",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+                  ),
+                  SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    children: horariosDisponibles.map((horario) {
+                      return ChoiceChip(
+                        label: Text(
+                          horario,
+                          style: TextStyle(
+                            color: horarioSeleccionado == horario ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        selectedColor: Colors.red,
+                        selected: horarioSeleccionado == horario,
+                        onSelected: (_) => _seleccionarHorario(horario),
+                      );
+                    }).toList(),
+                  ),
+                ],
+
+                SizedBox(height: 20),
+
+                /// Botón de Selección de Asientos
+                Align(
+                  alignment: Alignment.center,
+                  child: ElevatedButton(
+                    onPressed: (fechaSeleccionada != null && horarioSeleccionado != null)
+                        ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PantallaAsientos(
+                            peliculaId: widget.peliculaId,
+                            titulo: widget.titulo,
+                            precio: widget.precio,
+                            fechaSeleccionada: fechaSeleccionada!,
+                            horaSeleccionada: horarioSeleccionado!,
+                          ),
+                        ),
+                      );
+                    }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
-                    selectedColor: Colors.red, // 🔹 Color Rojo cuando se selecciona
-                    selected: horarioSeleccionado == horario,
-                    onSelected: (_) => _seleccionarHorario(horario),
-                  );
-                }).toList(),
-              ),
-            ],
-            SizedBox(height: 20),
-
-            // 🔹 Botón de Selección de Asientos
-            ElevatedButton(
-              onPressed: (fechaSeleccionada != null && horarioSeleccionado != null)
-                  ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PantallaAsientos(
-                      peliculaId: widget.peliculaId,
-                      titulo: widget.titulo,
-                      precio: widget.precio,
-                      fechaSeleccionada: fechaSeleccionada!,
-                      horaSeleccionada: horarioSeleccionado!,
+                    child: Text(
+                      "Seleccionar Asientos",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
-                );
-              }
-                  : null, // 🔹 Deshabilita el botón si no se selecciona fecha y horario
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue, // 🔹 Azul para el botón
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              child: Text("Seleccionar Asientos", style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

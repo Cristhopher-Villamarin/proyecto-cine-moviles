@@ -64,7 +64,6 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,89 +71,187 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
         title: Text("Seleccionar Asientos - ${widget.titulo}"),
         backgroundColor: Colors.indigo,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          SizedBox(height: 20),
+          /// Fondo degradado
           Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: 30,
-            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black, // Negro en la parte superior
+                  Color(0xFF3533CD), // Azul oscuro en la parte inferior
+                ],
+              ),
             ),
-            child: Text("PANTALLA", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
-          SizedBox(height: 20),
-          Expanded(
-            child: StreamBuilder(
-              stream: _firestore
-                  .collection("peliculas")
-                  .doc(widget.peliculaId)
-                  .collection("fechas_disponibles")
-                  .doc(widget.fechaSeleccionada)
-                  .collection("horarios")
-                  .doc(widget.horaSeleccionada)
-                  .collection("asientos")
-                  .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
-                var asientos = snapshot.data!.docs;
-                Map<String, List<QueryDocumentSnapshot>> filas = {};
-                for (var asiento in asientos) {
-                  String fila = asiento["numero"][0];
-                  filas.putIfAbsent(fila, () => []).add(asiento);
-                }
+          /// Imagen PNG superpuesta como marca de agua
+          Positioned.fill(
+            child: Image.asset(
+              'assets/fondo.png',
+              fit: BoxFit.cover,
+              colorBlendMode: BlendMode.srcOver,
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
 
-                return Column(
-                  children: filas.entries.map((entry) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: entry.value.map((asiento) {
-                        bool esOcupado = asiento["estado"] == "ocupado";
-                        bool esSeleccionado = _asientosSeleccionados.contains(asiento.id);
+          /// Contenido principal
+          Column(
+            children: [
+              SizedBox(height: 20),
 
-                        return GestureDetector(
-                          onTap: () {
-                            if (!esOcupado) _toggleAsiento(asiento.id);
-                          },
-                          child: Container(
-                            margin: EdgeInsets.all(4),
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: esOcupado ? Colors.red : (esSeleccionado ? Colors.green : Colors.grey[300]),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Center(
-                              child: Text(
-                                asiento["numero"],
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              /// Pantalla del cine más pequeña y gruesa
+              Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "PANTALLA",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              /// Muestra los asientos
+              Expanded(
+                child: StreamBuilder(
+                  stream: _firestore
+                      .collection("peliculas")
+                      .doc(widget.peliculaId)
+                      .collection("fechas_disponibles")
+                      .doc(widget.fechaSeleccionada)
+                      .collection("horarios")
+                      .doc(widget.horaSeleccionada)
+                      .collection("asientos")
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    var asientos = snapshot.data!.docs;
+                    Map<String, List<QueryDocumentSnapshot>> filas = {};
+                    for (var asiento in asientos) {
+                      String fila = asiento["numero"][0];
+                      filas.putIfAbsent(fila, () => []).add(asiento);
+                    }
+
+                    return Column(
+                      children: filas.entries.map((entry) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: entry.value.map((asiento) {
+                            bool esOcupado = asiento["estado"] == "ocupado";
+                            bool esSeleccionado =
+                            _asientosSeleccionados.contains(asiento.id);
+
+                            return GestureDetector(
+                              onTap: () {
+                                if (!esOcupado) _toggleAsiento(asiento.id);
+                              },
+                              child: Container(
+                                margin: EdgeInsets.all(5),
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: esOcupado
+                                      ? Colors.red // Ocupado (Rojo)
+                                      : (esSeleccionado
+                                      ? Colors.green // Seleccionado (Verde)
+                                      : Colors.grey[300]), // Disponible (Gris)
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      blurRadius: 4,
+                                      offset: Offset(2, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    asiento["numero"],
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          }).toList(),
                         );
                       }).toList(),
                     );
-                  }).toList(),
-                );
-              },
-            ),
+                  },
+                ),
+              ),
+
+
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildColorIndicator(Colors.grey[300]!, "Disponible"),
+                  _buildColorIndicator(Colors.green, "Seleccionado"),
+                  _buildColorIndicator(Colors.red, "Ocupado"),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              /// Total a pagar
+              Text(
+                "Total a Pagar: \$${_totalPago.toStringAsFixed(2)}",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+
+              SizedBox(height: 10),
+
+              /// Botón de pago
+              FloatingActionButton.extended(
+                onPressed: _irAPantallaDePago,
+                label: Text("Ir a Pagar"),
+                icon: Icon(Icons.payment),
+                backgroundColor: Colors.white,
+              ),
+
+
+
+              SizedBox(height: 20),
+            ],
           ),
-          SizedBox(height: 20),
-          Text("Total a Pagar: \$${_totalPago.toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          SizedBox(height: 10),
-          FloatingActionButton.extended(
-            onPressed: _irAPantallaDePago,
-            label: Text("Ir a Pagar"),
-            icon: Icon(Icons.payment),
-            backgroundColor: Colors.indigo,
-          ),
-          SizedBox(height: 20),
         ],
       ),
     );
   }
+}
+Widget _buildColorIndicator(Color color, String text) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 10),
+    child: Row(
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(5),
+          ),
+        ),
+        SizedBox(width: 5),
+        Text(text, style: TextStyle(color: Colors.white, fontSize: 16)),
+      ],
+    ),
+  );
 }
