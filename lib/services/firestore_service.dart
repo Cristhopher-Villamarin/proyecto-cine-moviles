@@ -7,8 +7,8 @@ class FirestoreService {
     List<Map<String, dynamic>> peliculas = [
       {
         "titulo": "Avatar 2",
-        "imagen": "https://http2.mlstatic.com/D_NQ_NP_820377-MLU70799697688_082023-O.webp",
-        "sinopsis": "Jake Sully y Ney'tiri han formado una familia y hacen todo lo posible por permanecer juntos. Sin embargo, deben abandonar su hogar y explorar las regiones de Pandora cuando una antigua amenaza reaparece.",
+        "imagen": "https://m.media-amazon.com/images/I/71yWmVIjTKL.jpg",
+        "sinopsis": "Jake Sully y Ney'tiri han formado una familia y hacen todo lo posible por permanecer juntos. Sin embargo, deben abandonar su hogar y explorar las regiones de Pandora cuando una antigua amenaza reaparece. Tendrán que adaptarse a los nuevos entornos y descubrir nuevas habilidades",
         "precio": 8.50,
         "duracion": "2h 30min",
         "clasificacion": "PG-13",
@@ -30,7 +30,7 @@ class FirestoreService {
       },
       {
         "titulo": "Spider-Man: No Way Home",
-        "imagen": "https://upload.wikimedia.org/wikipedia/en/0/00/Spider-Man_No_Way_Home_poster.jpg",
+        "imagen": "https://es.web.img2.acsta.net/pictures/17/06/19/14/01/130456.jpg",
         "sinopsis": "Spider-Man, nuestro héroe, vecino y amigo es desenmascarado y por tanto ya no es capaz de separar su vida normal de los enormes riesgos que conlleva ser un Súper Héroe. Cuando pide ayuda a Doctor Strange, los riesgos pasan a ser aún más peligrosos, obligándole a descubrir lo que realmente significa ser Spider-Man.",
         "precio": 9.00,
         "duracion": "2h 28min",
@@ -53,7 +53,7 @@ class FirestoreService {
       },
       {
         "titulo": "Avengers: End Game",
-        "imagen": "https://es.web.img3.acsta.net/c_310_420/pictures/19/03/26/17/22/0896830.jpg",
+        "imagen": "https://hips.hearstapps.com/hmg-prod/images/falcon-soldado-invierno-66575158d427c.jpg?crop=1xw:1xh;center,top&resize=980:*",
         "sinopsis": "Después de los eventos devastadores de Avengers: Infinity War, el universo está en ruinas debido a las acciones de Thanos, el Titán Loco. Con la ayuda de los aliados que quedaron, los Vengadores deberán reunirse una vez más para intentar detenerlo y restaurar el orden en el universo de una vez por todas.",
         "precio": 4.00,
         "duracion": "3h 02min",
@@ -76,7 +76,7 @@ class FirestoreService {
       },
       {
         "titulo": "The Batman",
-        "imagen": "https://ruta-imagen.com/spiderman.jpg",
+        "imagen": "https://images.squarespace-cdn.com/content/v1/581bd18003596e16cc905cad/1662591579186-KY3BHA6X25CNTWVAXSW3/The+Dark+Knight.jpg",
         "sinopsis": "En su segundo año luchando contra el crimen, Batman explora la corrupción existente en la ciudad de Gotham y el vínculo de esta con su propia familia. Además, entrará en conflicto con un asesino en serie conocido como el Acertijo.",
         "precio": 9.00,
         "duracion": "2h 15min",

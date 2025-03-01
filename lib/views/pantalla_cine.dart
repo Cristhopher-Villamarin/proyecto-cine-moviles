@@ -44,72 +44,88 @@ class _PantallaCineState extends State<PantallaCine> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cartelera de Películas"),
-        backgroundColor: Colors.indigo,
-      ),
-      body: Column(
-        children: [
-          SizedBox(height: 20), // 🔹 Espacio debajo del AppBar
-
-          // 🔹 Carrusel de imágenes
-          SizedBox(
-            height: 400, // 🔹 Se aumentó la altura del carrusel
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: imagenesCarrusel.length,
-              itemBuilder: (context, index) {
-                return AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  margin: EdgeInsets.symmetric(horizontal: 8, vertical: index == _currentPage ? 0 : 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                        offset: Offset(0, 4),
-                      )
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      imagenesCarrusel[index],
-                      fit: BoxFit.cover, // 🔹 Se adapta sin recortar
-                      width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: Icon(Icons.broken_image, size: 60, color: Colors.grey),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          SizedBox(height: 20), // 🔹 Más espacio debajo del carrusel
-
-          // 🔹 Título de la cartelera
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              "Cartelera",
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // 🔹 Centra el título y el icono
+          children: [
+            Icon(Icons.local_movies, color: Colors.white, size: 28), // 🎬 Icono de cine
+            SizedBox(width: 8), // 🔹 Espacio entre el icono y el texto
+            Text(
+              "CARTELERA DE PELÍCULAS",
               style: TextStyle(
-                fontSize: 22,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
+          ],
+        ),
+          backgroundColor: Colors.indigo,
+        ),
+      body: SingleChildScrollView( // 🔹 Permite desplazamiento en toda la pantalla
+        child: Column(
+          children: [
+            SizedBox(height: 20), // 🔹 Espacio debajo del AppBar
 
-          Expanded(
-            child: StreamBuilder(
+            // 🔹 Carrusel de imágenes
+            SizedBox(
+              height: 400, // 🔹 Se mantiene la altura ajustada
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: imagenesCarrusel.length,
+                itemBuilder: (context, index) {
+                  return AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: index == _currentPage ? 0 : 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: Offset(0, 4),
+                        )
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        imagenesCarrusel[index],
+                        fit: BoxFit.cover, // 🔹 Se adapta sin recortar
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: Center(
+                              child: Icon(Icons.broken_image, size: 60, color: Colors.grey),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            SizedBox(height: 20), // 🔹 Más espacio debajo del carrusel
+
+            // 🔹 Título de la cartelera
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                "CARTELERA",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue, // Azul
+                  fontFamily: 'Bebas Neue',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            // 🔹 Catálogo de películas
+            StreamBuilder(
               stream: _firestore.collection("peliculas").snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
@@ -130,6 +146,8 @@ class _PantallaCineState extends State<PantallaCine> {
                         mainAxisSpacing: 12,
                       ),
                       itemCount: peliculas.length,
+                      shrinkWrap: true, // 🔹 Evita que el GridView ocupe todo el espacio
+                      physics: NeverScrollableScrollPhysics(), // 🔹 Desactiva su scroll para que dependa del SingleChildScrollView
                       itemBuilder: (context, index) {
                         var pelicula = peliculas[index];
                         var data = pelicula.data() as Map<String, dynamic>;
@@ -211,9 +229,10 @@ class _PantallaCineState extends State<PantallaCine> {
                 );
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
 }
