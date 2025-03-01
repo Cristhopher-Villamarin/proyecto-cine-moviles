@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'pantalla_cine.dart'; // Importa la nueva pantalla
 
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -69,58 +70,136 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          /// Fondo degradado
           Container(
             decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/cine_fondo.jpg'), // Asegúrate de tener esta imagen en assets
-                fit: BoxFit.cover,
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black, // Negro en la parte superior
+                  Color(0xFF3533CD), // Azul oscuro en la parte inferior
+                ],
               ),
             ),
           ),
-          Container(
-            color: Colors.black.withOpacity(0.6), // Oscurecer para mejor legibilidad
+
+          /// Imagen PNG superpuesta como marca de agua
+          Positioned.fill(
+            child: Image.asset(
+              'assets/fondo.png', // Imagen de marca de agua
+              fit: BoxFit.cover,
+              colorBlendMode: BlendMode.srcOver,
+
+            ),
           ),
+
+
+          /// Imagen PNG superpuesta como marca de agua
+          Positioned.fill(
+            child: Image.asset(
+              'assets/fondo.png', // Imagen de marca de agua
+              fit: BoxFit.cover,
+              colorBlendMode: BlendMode.srcOver,
+
+            ),
+          ),
+
+          /// Imágenes en las 4 esquinas con efecto "metido"
+          Positioned(
+            top: -40, left: -30, // Parte fuera de la pantalla
+            child: Image.asset(
+              'assets/objeto1.png',
+              width: 300, // Más grande para que sobresalga
+            ),
+          ),
+          Positioned(
+            top: -40, right: -30, // Parte fuera de la pantalla
+            child: Image.asset(
+              'assets/objeto2.png',
+              width: 300,
+            ),
+          ),
+          Positioned(
+            bottom: -40, left: -30, // Parte fuera de la pantalla
+            child: Image.asset(
+              'assets/objeto3.png',
+              width: 300,
+            ),
+          ),
+          Positioned(
+            bottom: -40, right: -30, // Parte fuera de la pantalla
+            child: Image.asset(
+              'assets/objeto4.png',
+              width: 300,
+            ),
+          ),
+
+          /// Contenido principal con el nuevo diseño
           Center(
             child: Card(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.black.withOpacity(0.4), // Fondo negro con transparencia
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              margin: EdgeInsets.symmetric(horizontal: 20),
+              margin: EdgeInsets.symmetric(horizontal: 30),
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.red,
-                      child: Icon(
-                        Icons.local_movies_rounded,
-                        size: 40,
-                        color: Colors.white,
-                      ),
+                    /// Logo reemplazado
+                    Image.asset(
+                      'assets/logo2.png', // Asegúrate de tener este logo en assets
+                      height: 80, // Ajusta el tamaño según necesidad
                     ),
                     SizedBox(height: 20),
-                    Text(
-                      'IMAX',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
+
+                    /// Título "CINE HOUSE" con estilos
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "CINE",
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red, // Rojo
+                              fontFamily: 'Bebas Neue', // Cambia la fuente si es necesario
+                            ),
+                          ),
+                          TextSpan(
+                            text: " HOUSE",
+                            style: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue, // Azul
+                              fontFamily: 'Bebas Neue',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
                     SizedBox(height: 8),
+
+                    /// Frase debajo del título en blanco
                     Text(
                       'Tu asiento, el mejor lugar para vivir la aventura.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white, // Blanco
+                        fontFamily: 'Arial',
                       ),
                     ),
+
                     SizedBox(height: 20),
+
+                    /// Botón de inicio de sesión
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -130,6 +209,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
+                        minimumSize: Size(250, 60),
+                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                       ),
                       icon: Image.asset(
                         'assets/google_logo.png',
@@ -145,9 +226,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _isSigningIn ? null : _signInWithGoogle,
                     ),
                     SizedBox(height: 16),
-                    Divider(color: Colors.white),
-                    SizedBox(height: 16),
                   ],
+
+
                 ),
               ),
             ),
