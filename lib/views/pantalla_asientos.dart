@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'pantalla_pago.dart';
 
 class PantallaAsientos extends StatefulWidget {
   final String peliculaId;
   final String titulo;
   final double precio;
-  final String fechaSeleccionada; // 📌 Nuevo: Fecha seleccionada
-  final String horaSeleccionada;  // 📌 Nuevo: Hora seleccionada
+  final String fechaSeleccionada;
+  final String horaSeleccionada;
 
   const PantallaAsientos({
     Key? key,
     required this.peliculaId,
     required this.titulo,
     required this.precio,
-    required this.fechaSeleccionada, // 📌 Se añade como requerido
-    required this.horaSeleccionada,  // 📌 Se añade como requerido
+    required this.fechaSeleccionada,
+    required this.horaSeleccionada,
   }) : super(key: key);
 
   @override
@@ -34,10 +35,13 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
         _asientosSeleccionados.add(asientoId);
       }
       _totalPago = _asientosSeleccionados.length * widget.precio;
+
+      print("📌 Asientos seleccionados: $_asientosSeleccionados");
+      print("💰 Total a pagar: $_totalPago");
     });
   }
 
-  Future<void> _confirmarReserva() async {
+  void _irAPantallaDePago() {
     if (_asientosSeleccionados.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Selecciona al menos un asiento")),
@@ -45,27 +49,20 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
       return;
     }
 
-    for (String asiento in _asientosSeleccionados) {
-      await _firestore
-          .collection("peliculas")
-          .doc(widget.peliculaId)
-          .collection("fechas_disponibles")
-          .doc(widget.fechaSeleccionada)
-          .collection("horarios")
-          .doc(widget.horaSeleccionada)
-          .collection("asientos")
-          .doc(asiento)
-          .update({"estado": "ocupado"});
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PantallaPago(
+          totalPago: _totalPago,
+          peliculaId: widget.peliculaId, // ✅ Se pasa correctamente
+          peliculaTitulo: widget.titulo,
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Reserva confirmada")),
+          fechaSeleccionada: widget.fechaSeleccionada,
+          horaSeleccionada: widget.horaSeleccionada,
+          asientosSeleccionados: _asientosSeleccionados,
+        ),
+      ),
     );
-
-    setState(() {
-      _asientosSeleccionados.clear();
-      _totalPago = 0.0;
-    });
   }
 
   @override
@@ -78,8 +75,6 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
       body: Column(
         children: [
           SizedBox(height: 20),
-
-          // 🔹 Representación de la pantalla del cine
           Container(
             width: MediaQuery.of(context).size.width * 0.8,
             height: 30,
@@ -88,15 +83,9 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
               color: Colors.black,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              "PANTALLA",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
+            child: Text("PANTALLA", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
-
           SizedBox(height: 20),
-
-          // 🔹 Muestra los asientos organizados por filas
           Expanded(
             child: StreamBuilder(
               stream: _firestore
@@ -109,20 +98,13 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
                   .collection("asientos")
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
+                if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
                 var asientos = snapshot.data!.docs;
-
-                // 🔹 Crear la estructura de filas y columnas
                 Map<String, List<QueryDocumentSnapshot>> filas = {};
                 for (var asiento in asientos) {
-                  String fila = asiento["numero"][0]; // Obtiene la letra de la fila (Ej: "A1" -> "A")
-                  if (!filas.containsKey(fila)) {
-                    filas[fila] = [];
-                  }
-                  filas[fila]!.add(asiento);
+                  String fila = asiento["numero"][0];
+                  filas.putIfAbsent(fila, () => []).add(asiento);
                 }
 
                 return Column(
@@ -135,20 +117,14 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
 
                         return GestureDetector(
                           onTap: () {
-                            if (!esOcupado) {
-                              _toggleAsiento(asiento.id);
-                            }
+                            if (!esOcupado) _toggleAsiento(asiento.id);
                           },
                           child: Container(
                             margin: EdgeInsets.all(4),
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: esOcupado
-                                  ? Colors.red
-                                  : esSeleccionado
-                                  ? Colors.green
-                                  : Colors.grey[300],
+                              color: esOcupado ? Colors.red : (esSeleccionado ? Colors.green : Colors.grey[300]),
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Center(
@@ -166,25 +142,16 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
               },
             ),
           ),
-
           SizedBox(height: 20),
-
-          // 🔹 Mostrar el total a pagar
-          Text(
-            "Total a Pagar: \$${_totalPago.toStringAsFixed(2)}",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-
+          Text("Total a Pagar: \$${_totalPago.toStringAsFixed(2)}",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           SizedBox(height: 10),
-
-          // 🔹 Botón para confirmar la reserva
           FloatingActionButton.extended(
-            onPressed: _confirmarReserva,
-            label: Text("Confirmar Reserva"),
-            icon: Icon(Icons.check),
+            onPressed: _irAPantallaDePago,
+            label: Text("Ir a Pagar"),
+            icon: Icon(Icons.payment),
             backgroundColor: Colors.indigo,
           ),
-
           SizedBox(height: 20),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+// 🔹 Importar WebViewFlutter
 import 'services/firestore_service.dart';
 import 'views/login_screen.dart';
 
@@ -11,19 +12,20 @@ void main() async {
     // Para Web, usa FirebaseOptions
     await Firebase.initializeApp(
       options: FirebaseOptions(
-        apiKey: "AIzaSyC5FXqHDCZmMUnDOQ3mqDPWOisnxxqppSc", // Clave de API web
-        authDomain: "proyecto-cine-ea02c.firebaseapp.com", // authDomain del proyecto
-        projectId: "proyecto-cine-ea02c", // ID del proyecto
-        storageBucket: "proyecto-cine-ea02c.appspot.com", // Storage bucket
-        messagingSenderId: "1067716693159", // Sender ID del proyecto
-        appId: "1:1067716693159:android:611e4c63c3276ab242df82", // App ID del proyecto
+        apiKey: "AIzaSyAysPjX7iFU_bszqKo70DZ-sY3nzFkOYRE",
+        authDomain: "cine-movil-e195d.firebaseapp.com",
+        projectId: "cine-movil-e195d",
+        storageBucket: "cine-movil-e195d.appspot.com",
+        messagingSenderId: "836982216924",
+        appId: "1:836982216924:android:94a28e568e528b94aa7c19",
       ),
     );
   } else {
-    // Para Android e iOS, Firebase detecta automáticamente los archivos de configuración
     await Firebase.initializeApp();
+  // 🔹 Inicializa WebView en Android
   }
-  FirestoreService firestoreService = FirestoreService();
+
+FirestoreService firestoreService = FirestoreService();
   await firestoreService.agregarPeliculas();
 
   runApp(MyApp());

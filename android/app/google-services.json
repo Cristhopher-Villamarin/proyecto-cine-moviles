@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1067716693159",
-    "project_id": "proyecto-cine-ea02c",
-    "storage_bucket": "proyecto-cine-ea02c.firebasestorage.app"
+    "project_number": "836982216924",
+    "project_id": "cine-movil-e195d",
+    "storage_bucket": "cine-movil-e195d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1067716693159:android:611e4c63c3276ab242df82",
+        "mobilesdk_app_id": "1:836982216924:android:94a28e568e528b94aa7c19",
         "android_client_info": {
           "package_name": "com.example.proyecto_cine"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC5FXqHDCZmMUnDOQ3mqDPWOisnxxqppSc"
+          "current_key": "AIzaSyAysPjX7iFU_bszqKo70DZ-sY3nzFkOYRE"
         }
       ],
       "services": {
