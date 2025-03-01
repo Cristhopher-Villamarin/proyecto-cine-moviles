@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'pantalla_fecha_hora.dart'; // Importa la nueva pantalla de selección de fecha y horario
+import 'pantalla_fecha_hora.dart'; // Importa la pantalla de selección de fecha y horario
 
 class PantallaCine extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _PantallaCineState extends State<PantallaCine> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Catálogo de Películas"),
+        title: Text("Cartelera de Películas"),
         backgroundColor: Colors.indigo,
       ),
       body: StreamBuilder(
@@ -26,75 +26,96 @@ class _PantallaCineState extends State<PantallaCine> {
 
           var peliculas = snapshot.data!.docs;
 
-          return GridView.builder(
-            padding: EdgeInsets.all(10),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // 2 películas por fila
-              childAspectRatio: 0.7,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: peliculas.length,
-            itemBuilder: (context, index) {
-              var pelicula = peliculas[index];
-              var data = pelicula.data() as Map<String, dynamic>;
-
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          return Center( // 🔹 Centra el contenido en la pantalla
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.9, // 🔹 Reduce el ancho del Grid
+              child: GridView.builder(
+                padding: EdgeInsets.all(8),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // 🔹 3 películas por fila
+                  childAspectRatio: 0.55, // 🔹 Reduce el tamaño de las tarjetas
+                  crossAxisSpacing: 12, // 🔹 Espacio entre columnas
+                  mainAxisSpacing: 12, // 🔹 Espacio entre filas
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                        child: Image.network(
-                          data["imagen"],
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.broken_image, size: 100, color: Colors.grey);
-                          },
-                        ),
-                      ),
+                itemCount: peliculas.length,
+                itemBuilder: (context, index) {
+                  var pelicula = peliculas[index];
+                  var data = pelicula.data() as Map<String, dynamic>;
+
+                  return Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        data["titulo"] ?? "Sin título",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PantallaFechaHora(
-                              peliculaId: pelicula.id,
-                              titulo: data["titulo"],
-                              imagen: data["imagen"],
-                              sinopsis: data["sinopsis"],
-                              precio: data["precio"].toDouble(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                            child: AspectRatio( // 🔹 Asegura que la imagen se adapta sin perder calidad
+                              aspectRatio: 0.7, // Mantiene la proporción
+                              child: Image.network(
+                                data["imagen"],
+                                fit: BoxFit.cover, // 🔹 Se adapta sin recortarse
+                                width: double.infinity,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(Icons.broken_image, size: 50, color: Colors.grey);
+                                },
+                              ),
                             ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo,
-                      ),
-                      child: Text("Comprar"),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            data["titulo"] ?? "Sin título",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PantallaFechaHora(
+                                    peliculaId: pelicula.id,
+                                    titulo: data["titulo"],
+                                    imagen: data["imagen"],
+                                    sinopsis: data["sinopsis"],
+                                    precio: data["precio"].toDouble(),
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.indigo,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8), // 🔹 Mejora el diseño del botón
+                              ),
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6), // 🔹 Ajusta el tamaño del botón
+                            ),
+                            child: Text(
+                              "Comprar",
+                              style: TextStyle(fontSize: 14, color: Colors.white), // 🔹 Hace el texto más visible
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           );
         },
       ),
