@@ -18,7 +18,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Cerrar sesión antes de iniciar una nueva sesión
       await GoogleSignIn().signOut();
       await _firebaseAuth.signOut();
 
@@ -68,84 +67,91 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFF6F9FF), Color(0xFFE9ECFF)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.indigo,
-                    child: Icon(
-                      Icons.local_movies_rounded,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Cine App',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Inicia sesión para ver películas y reservar boletos',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.indigo,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      side: BorderSide(color: Colors.indigo),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    icon: Image.asset(
-                      'assets/google_logo.png',
-                      height: 20,
-                      width: 20,
-                    ),
-                    label: _isSigningIn
-                        ? CircularProgressIndicator()
-                        : Text(
-                      'Iniciar sesión con Google',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    onPressed: _isSigningIn ? null : _signInWithGoogle,
-                  ),
-                  SizedBox(height: 16),
-                  Divider(),
-                  SizedBox(height: 16),
-                ],
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/cine_fondo.jpg'), // Asegúrate de tener esta imagen en assets
+                fit: BoxFit.cover,
               ),
             ),
           ),
-        ),
+          Container(
+            color: Colors.black.withOpacity(0.6), // Oscurecer para mejor legibilidad
+          ),
+          Center(
+            child: Card(
+              color: Colors.white.withOpacity(0.9),
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.red,
+                      child: Icon(
+                        Icons.local_movies_rounded,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'IMAX',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Tu asiento, el mejor lugar para vivir la aventura.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        side: BorderSide(color: Colors.red),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      icon: Image.asset(
+                        'assets/google_logo.png',
+                        height: 20,
+                        width: 20,
+                      ),
+                      label: _isSigningIn
+                          ? CircularProgressIndicator()
+                          : Text(
+                        'Iniciar sesión con Google',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      onPressed: _isSigningIn ? null : _signInWithGoogle,
+                    ),
+                    SizedBox(height: 16),
+                    Divider(color: Colors.white),
+                    SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

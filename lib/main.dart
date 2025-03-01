@@ -25,8 +25,8 @@ void main() async {
   // 🔹 Inicializa WebView en Android
   }
 
-FirestoreService firestoreService = FirestoreService();
-  await firestoreService.agregarPeliculas();
+//FirestoreService firestoreService = FirestoreService();
+//  await firestoreService.agregarPeliculas();
 
   runApp(MyApp());
 }
