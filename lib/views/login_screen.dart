@@ -85,10 +85,11 @@ class _LoginScreenState extends State<LoginScreen> {
               color: Colors.white.withOpacity(0.9),
               elevation: 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(15),
               ),
+              margin: EdgeInsets.symmetric(horizontal: 20),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
