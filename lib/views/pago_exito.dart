@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-
+import 'pantalla_cine.dart';
 class PagoExitosoScreen extends StatelessWidget {
   final double total;
   final String peliculatitulo;
@@ -47,7 +47,12 @@ class PagoExitosoScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.popUntil(context, ModalRoute.withName('/'));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PantallaCine(),
+                  ),
+                );
               },
               child: Text("Volver al inicio"),
             ),

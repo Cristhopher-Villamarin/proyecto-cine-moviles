@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'pago_exito.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'pantalla_cine.dart';
 
 class PantallaPago extends StatefulWidget {
   final double totalPago;

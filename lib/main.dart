@@ -26,7 +26,7 @@ void main() async {
   }
 
 //FirestoreService firestoreService = FirestoreService();
-//  await firestoreService.agregarPeliculas();
+//await firestoreService.agregarPeliculas();
 
   runApp(MyApp());
 }
