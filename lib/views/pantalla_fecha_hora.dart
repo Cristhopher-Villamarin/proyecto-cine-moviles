@@ -34,7 +34,7 @@ class _PantallaFechaHoraState extends State<PantallaFechaHora> {
       fechaSeleccionada = fechaId;
       fechaTextoSeleccionada = fechaTexto;
       horariosDisponibles = horarios;
-      horarioSeleccionado = null; // Reiniciar horario seleccionado
+      horarioSeleccionado = null;
     });
   }
 
@@ -47,22 +47,74 @@ class _PantallaFechaHoraState extends State<PantallaFechaHora> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // 🔹 Fondo Blanco
       appBar: AppBar(
         title: Text("Seleccionar Fecha y Horario"),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.indigo, // 🔹 Azul Oscuro
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Image.network(widget.imagen, height: 200, fit: BoxFit.cover),
-            SizedBox(height: 10),
-            Text(widget.titulo, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Text(widget.sinopsis, textAlign: TextAlign.center),
-            Text("Precio: \$${widget.precio}", style: TextStyle(fontSize: 18, color: Colors.green)),
-            SizedBox(height: 20),
+            // 🔹 Sección de Imagen y Descripción en dos columnas
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                  )
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 🔹 Imagen a la izquierda
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      widget.imagen,
+                      height: 220,
+                      width: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(width: 12), // 🔹 Espacio entre imagen y texto
 
-            Text("Selecciona una Fecha", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  // 🔹 Texto a la derecha
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.titulo,
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          widget.sinopsis,
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(fontSize: 14, color: Colors.black87),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          "Precio: \$${widget.precio}",
+                          style: TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 20), // 🔹 Espaciado
+
+            // 🔹 Selección de Fechas
+            Text("Selecciona una Fecha", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
             StreamBuilder(
               stream: _firestore.collection("peliculas").doc(widget.peliculaId)
                   .collection("fechas_disponibles").snapshots(),
@@ -80,7 +132,11 @@ class _PantallaFechaHoraState extends State<PantallaFechaHora> {
                     String fechaTexto = "${data["dia_letras"]} ${data["dia_numero"]} ${data["mes"]}";
 
                     return ChoiceChip(
-                      label: Text(fechaTexto),
+                      label: Text(
+                        fechaTexto,
+                        style: TextStyle(color: fechaSeleccionada == fecha.id ? Colors.white : Colors.black),
+                      ),
+                      selectedColor: Colors.red, // 🔹 Color Rojo cuando se selecciona
                       selected: fechaSeleccionada == fecha.id,
                       onSelected: (_) => _seleccionarFecha(
                           fecha.id, fechaTexto, List<String>.from(data["horarios"])
@@ -90,15 +146,21 @@ class _PantallaFechaHoraState extends State<PantallaFechaHora> {
                 );
               },
             ),
+
             SizedBox(height: 20),
 
+            // 🔹 Selección de Horario (solo si se ha seleccionado una fecha)
             if (horariosDisponibles.isNotEmpty) ...[
-              Text("Selecciona un Horario", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("Selecciona un Horario", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
               Wrap(
                 spacing: 10,
                 children: horariosDisponibles.map((horario) {
                   return ChoiceChip(
-                    label: Text(horario),
+                    label: Text(
+                      horario,
+                      style: TextStyle(color: horarioSeleccionado == horario ? Colors.white : Colors.black),
+                    ),
+                    selectedColor: Colors.red, // 🔹 Color Rojo cuando se selecciona
                     selected: horarioSeleccionado == horario,
                     onSelected: (_) => _seleccionarHorario(horario),
                   );
@@ -107,6 +169,7 @@ class _PantallaFechaHoraState extends State<PantallaFechaHora> {
             ],
             SizedBox(height: 20),
 
+            // 🔹 Botón de Selección de Asientos
             ElevatedButton(
               onPressed: (fechaSeleccionada != null && horarioSeleccionado != null)
                   ? () {
@@ -117,15 +180,19 @@ class _PantallaFechaHoraState extends State<PantallaFechaHora> {
                       peliculaId: widget.peliculaId,
                       titulo: widget.titulo,
                       precio: widget.precio,
-                      fechaSeleccionada: fechaSeleccionada!, // 📌 Pasar fecha seleccionada
-                      horaSeleccionada: horarioSeleccionado!, // 📌 Pasar horario seleccionado
+                      fechaSeleccionada: fechaSeleccionada!,
+                      horaSeleccionada: horarioSeleccionado!,
                     ),
                   ),
                 );
               }
-                  : null, // Deshabilitar si no ha seleccionado fecha y horario
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
-              child: Text("Seleccionar Asientos"),
+                  : null, // 🔹 Deshabilita el botón si no se selecciona fecha y horario
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue, // 🔹 Azul para el botón
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: Text("Seleccionar Asientos", style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
           ],
         ),
