@@ -33,7 +33,14 @@ class PagoExitosoScreen extends StatelessWidget {
       "PagoTotal": total.toStringAsFixed(2),
     };
 
-    String qrData = jsonEncode(datosQR); // Convertir el mapa a JSON
+    String qrData = """
+    📽️ Película: ${peliculatitulo}
+    📅 Fecha: ${fechapelicula}
+    🕒 Hora: ${horapelicula}
+    👤 Comprador: ${comprador}
+    🎟️ Asientos: ${asientos.join(", ")}
+    💰 Pago Total: \$${total.toStringAsFixed(2)}
+    """;
 
     return Scaffold(
       body: Stack(

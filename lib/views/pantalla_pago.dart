@@ -32,56 +32,14 @@ class _PantallaPagoState extends State<PantallaPago> {
   final TextEditingController numeroTarjetaController = TextEditingController();
   final TextEditingController fechaExpiracionController = TextEditingController();
   final TextEditingController cvvController = TextEditingController();
-
-  bool _isProcessing = false; // 🔹 Variable para manejar la carga
-
-  // Función para validar el nombre del titular
-  bool _validarNombreTitular(String nombre) {
-    final RegExp regex = RegExp(r'^[a-zA-Z\s]+$');
-    return regex.hasMatch(nombre);
-  }
-
-  // Función para validar el número de tarjeta
-  bool _validarNumeroTarjeta(String numero) {
-    final RegExp regex = RegExp(r'^\d{16}$');
-    return regex.hasMatch(numero);
-  }
-
-  // Función para validar la fecha de expiración
-  bool _validarFechaExpiracion(String fecha) {
-    final RegExp regex = RegExp(r'^\d{2}/\d{2}$');
-    if (!regex.hasMatch(fecha)) return false;
-
-    final List<String> partes = fecha.split('/');
-    final int mes = int.tryParse(partes[0]) ?? 0;
-    final int anio = int.tryParse(partes[1]) ?? 0;
-
-    if (mes < 1 || mes > 12) return false;
-
-    final DateTime ahora = DateTime.now();
-    final int anioActual = ahora.year % 100;
-    final int mesActual = ahora.month;
-
-    if (anio < anioActual || (anio == anioActual && mes < mesActual)) {
-    return false; // Fecha vencida
-    }
-
-    return true;
-  }
-
-  // Función para validar el CVV
-  bool _validarCVV(String cvv) {
-    final RegExp regex = RegExp(r'^\d{3,4}$');
-    return regex.hasMatch(cvv);
-  }
+  bool _isProcessing = false;
 
   Future<void> _procesarPago() async {
-    if (_isProcessing) return; // Evita múltiples clics
-    setState(() => _isProcessing = true); // 🔹 Activa la animación de carga
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
 
     final User? user = FirebaseAuth.instance.currentUser;
 
-    // Validaciones de campos
     if (nombreTitularController.text.isEmpty ||
         numeroTarjetaController.text.isEmpty ||
         fechaExpiracionController.text.isEmpty ||
@@ -93,39 +51,8 @@ class _PantallaPagoState extends State<PantallaPago> {
       return;
     }
 
-    if (!_validarNombreTitular(nombreTitularController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Nombre del titular no válido")),
-      );
-      setState(() => _isProcessing = false);
-      return;
-    }
-
-    if (!_validarNumeroTarjeta(numeroTarjetaController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Número de tarjeta no válido")),
-      );
-      setState(() => _isProcessing = false);
-      return;
-    }
-
-    if (!_validarFechaExpiracion(fechaExpiracionController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Fecha de expiración no válida o vencida")),
-      );
-      setState(() => _isProcessing = false);
-      return;
-    }
-
-    if (!_validarCVV(cvvController.text)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("CVV no válido")),
-      );
-      setState(() => _isProcessing = false);
-      return;
-    }
-
     try {
+      // 🔹 Registrar el pago en la colección "pagos"
       DocumentReference pagoRef = await _firestore.collection("pagos").add({
         "total": widget.totalPago,
         "peliculaId": widget.peliculaId,
@@ -134,7 +61,7 @@ class _PantallaPagoState extends State<PantallaPago> {
         "hora_funcion": widget.horaSeleccionada,
         "asientos": widget.asientosSeleccionados,
         "titular": nombreTitularController.text,
-        "numero_tarjeta": numeroTarjetaController.text,
+        "numero_tarjeta": numeroTarjetaController.text.replaceAll(" ", ""),
         "fecha_expiracion": fechaExpiracionController.text,
         "cvv": cvvController.text,
         "estado": "APROBADO",
@@ -143,6 +70,7 @@ class _PantallaPagoState extends State<PantallaPago> {
 
       print("✅ Pago registrado con ID: ${pagoRef.id}");
 
+      // 🔹 Actualizar el estado de los asientos a "ocupado"
       for (String asiento in widget.asientosSeleccionados) {
         DocumentReference asientoRef = _firestore
             .collection("peliculas")
@@ -157,9 +85,13 @@ class _PantallaPagoState extends State<PantallaPago> {
         DocumentSnapshot asientoSnapshot = await asientoRef.get();
         if (asientoSnapshot.exists) {
           await asientoRef.update({"estado": "ocupado"});
+          print("🔄 Asiento $asiento actualizado como ocupado");
+        } else {
+          print("⚠️ Advertencia: El asiento $asiento no existe en Firestore");
         }
       }
 
+      // 🔹 Redirigir a la pantalla de pago exitoso
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -179,29 +111,26 @@ class _PantallaPagoState extends State<PantallaPago> {
         SnackBar(content: Text("Error al procesar el pago")),
       );
     } finally {
-      setState(() => _isProcessing = false); // 🔹 Desactiva la animación
+      setState(() => _isProcessing = false);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // El decoration debe estar dentro del body, no directamente en el Scaffold
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.black, // Negro en la parte superior
-              Color(0xFF3533CD), // Azul oscuro en la parte inferior
-            ],
+            colors: [Colors.black, Color(0xFF3533CD)],
           ),
         ),
         child: Stack(
           children: [
             Positioned.fill(
               child: Image.asset(
-                'assets/fondo.png', // Imagen de marca de agua
+                'assets/fondo.png',
                 fit: BoxFit.cover,
                 colorBlendMode: BlendMode.srcOver,
               ),
@@ -216,13 +145,11 @@ class _PantallaPagoState extends State<PantallaPago> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Container(
-                      width: 350, // Hacemos la tarjeta más pequeña y centrada
+                      width: 350,
                       padding: EdgeInsets.all(20),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          /// Encabezado con título centrado
                           Container(
                             padding: EdgeInsets.all(12),
                             decoration: BoxDecoration(
@@ -240,59 +167,60 @@ class _PantallaPagoState extends State<PantallaPago> {
                               ),
                             ),
                           ),
-
                           SizedBox(height: 16),
-
-                          Text(
-                            "Completa los datos para finalizar tu compra",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 14,
-                            ),
-                          ),
-
-                          SizedBox(height: 16),
-
-                          /// Información del pago
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Color(0xFFC3E1FF),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _infoText("Película:", widget.peliculaTitulo, true),
-                                _infoText("Asientos:", widget.asientosSeleccionados.join(", "), true),
-                                _infoText("Total a pagar:", "\$${widget.totalPago.toStringAsFixed(2)}", true),
-                              ],
-                            ),
-                          ),
-
+                          _infoText("Película:", widget.peliculaTitulo, true),
+                          _infoText("Asientos:", widget.asientosSeleccionados.join(", "), true),
+                          _infoText("Total a pagar:", "\$${widget.totalPago.toStringAsFixed(2)}", true),
                           SizedBox(height: 20),
-
-                          /// Campos de pago
-                          _buildTextField("Nombre del titular", Icons.person, nombreTitularController),
-                          _buildTextField("Número de tarjeta", Icons.credit_card, numeroTarjetaController),
+                          _buildTextField("Nombre del titular", Icons.person, nombreTitularController, [
+                            FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z\s]+$'))
+                          ]),
+                          _buildTextField("Número de tarjeta", Icons.credit_card, numeroTarjetaController, [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(19),
+                          ], onChanged: (value) {
+                            value = value.replaceAll(RegExp(r'\s'), '');
+                            if (value.length > 16) value = value.substring(0, 16);
+                            String formatted = '';
+                            for (int i = 0; i < value.length; i++) {
+                              if (i % 4 == 0 && i != 0) formatted += ' ';
+                              formatted += value[i];
+                            }
+                            numeroTarjetaController.value = TextEditingValue(
+                              text: formatted,
+                              selection: TextSelection.collapsed(offset: formatted.length),
+                            );
+                          }),
                           Row(
                             children: [
                               Expanded(
-                                child: _buildTextField("Fecha de expiración (MM/YY)", Icons.calendar_today, fechaExpiracionController),
+                                child: _buildTextField("Fecha Exp. (MM/YY)", Icons.calendar_today, fechaExpiracionController, [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(5),
+                                ], onChanged: (value) {
+                                  value = value.replaceAll(RegExp(r'[^0-9]'), '');
+                                  if (value.length > 4) value = value.substring(0, 4);
+                                  if (value.length >= 2 && !value.contains('/')) {
+                                    value = value.substring(0, 2) + '/' + value.substring(2);
+                                  }
+                                  fechaExpiracionController.value = TextEditingValue(
+                                    text: value,
+                                    selection: TextSelection.collapsed(offset: value.length),
+                                  );
+                                }),
                               ),
-                              SizedBox(width: 12),
+                              SizedBox(width: 10),
                               Expanded(
-                                child: _buildTextField("CVV", Icons.lock, cvvController),
+                                child: _buildTextField("CVV", Icons.lock, cvvController, [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(3),
+                                ]),
                               ),
                             ],
                           ),
-
                           SizedBox(height: 20),
-
-                          /// Botón de pago
                           SizedBox(
-                            width: double.infinity, // Hace el botón más largo
+                            width: double.infinity,
                             child: ElevatedButton(
                               onPressed: _isProcessing ? null : _procesarPago,
                               style: ElevatedButton.styleFrom(
@@ -322,40 +250,29 @@ class _PantallaPagoState extends State<PantallaPago> {
       ),
     );
   }
-  /// Función para mostrar información del pago
+
   Widget _infoText(String label, String value, bool isBold) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Color(0xFF3533CD),
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: Colors.black87,
-            ),
-          ),
+          Text(label, style: TextStyle(color: Color(0xFF3533CD), fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(value, style: TextStyle(fontSize: 16, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
         ],
       ),
     );
   }
 
-  /// Función para construir campos de texto con íconos
-  Widget _buildTextField(String label, IconData icon, TextEditingController controller) {
+  Widget _buildTextField(String label, IconData icon, TextEditingController controller,
+      List<TextInputFormatter> formatters, {Function(String)? onChanged}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: controller,
+        keyboardType: TextInputType.number, // Adaptado según el campo
+        inputFormatters: formatters,
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
@@ -366,4 +283,5 @@ class _PantallaPagoState extends State<PantallaPago> {
       ),
     );
   }
+
 }
