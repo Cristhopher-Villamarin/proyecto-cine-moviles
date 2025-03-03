@@ -172,10 +172,12 @@ class _PantallaPagoState extends State<PantallaPago> {
                           _infoText("Asientos:", widget.asientosSeleccionados.join(", "), true),
                           _infoText("Total a pagar:", "\$${widget.totalPago.toStringAsFixed(2)}", true),
                           SizedBox(height: 20),
-                          _buildTextField("Nombre del titular", Icons.person, nombreTitularController, [
+                          _buildTextField("Nombre del titular", Icons.person,
+                              nombreTitularController, TextInputType.text, [
                             FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z\s]+$'))
                           ]),
-                          _buildTextField("Número de tarjeta", Icons.credit_card, numeroTarjetaController, [
+                          _buildTextField("Número de tarjeta", Icons.credit_card,
+                              numeroTarjetaController, TextInputType.number, [
                             FilteringTextInputFormatter.digitsOnly,
                             LengthLimitingTextInputFormatter(19),
                           ], onChanged: (value) {
@@ -194,7 +196,8 @@ class _PantallaPagoState extends State<PantallaPago> {
                           Row(
                             children: [
                               Expanded(
-                                child: _buildTextField("Fecha Exp. (MM/YY)", Icons.calendar_today, fechaExpiracionController, [
+                                child: _buildTextField("Fecha Exp. (MM/YY)", Icons.calendar_today,
+                                    fechaExpiracionController, TextInputType.number, [
                                   FilteringTextInputFormatter.digitsOnly,
                                   LengthLimitingTextInputFormatter(5),
                                 ], onChanged: (value) {
@@ -211,7 +214,8 @@ class _PantallaPagoState extends State<PantallaPago> {
                               ),
                               SizedBox(width: 10),
                               Expanded(
-                                child: _buildTextField("CVV", Icons.lock, cvvController, [
+                                child: _buildTextField("CVV", Icons.lock, cvvController,
+                                    TextInputType.number, [
                                   FilteringTextInputFormatter.digitsOnly,
                                   LengthLimitingTextInputFormatter(3),
                                 ]),
@@ -264,13 +268,13 @@ class _PantallaPagoState extends State<PantallaPago> {
     );
   }
 
-  Widget _buildTextField(String label, IconData icon, TextEditingController controller,
+  Widget _buildTextField(String label, IconData icon, TextEditingController controller , TextInputType keyboardType,
       List<TextInputFormatter> formatters, {Function(String)? onChanged}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: controller,
-        keyboardType: TextInputType.number, // Adaptado según el campo
+        keyboardType: keyboardType, // Adaptado según el campo
         inputFormatters: formatters,
         onChanged: onChanged,
         decoration: InputDecoration(

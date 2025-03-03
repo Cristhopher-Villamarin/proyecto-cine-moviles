@@ -1,0 +1,2 @@
+C:/David/Proyectos/proyecto-cine-moviles/android/app/.cxx/RelWithDebInfo/2m2y3x1f/x86_64/CMakeFiles/edit_cache.dir
+C:/David/Proyectos/proyecto-cine-moviles/android/app/.cxx/RelWithDebInfo/2m2y3x1f/x86_64/CMakeFiles/rebuild_cache.dir
