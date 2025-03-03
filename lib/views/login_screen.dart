@@ -110,28 +110,28 @@ class _LoginScreenState extends State<LoginScreen> {
             top: -40, left: -30, // Parte fuera de la pantalla
             child: Image.asset(
               'assets/objeto1.png',
-              width: 300, // Más grande para que sobresalga
+              width: 250, // Más grande para que sobresalga
             ),
           ),
           Positioned(
             top: -40, right: -30, // Parte fuera de la pantalla
             child: Image.asset(
               'assets/objeto2.png',
-              width: 300,
+              width: 250,
             ),
           ),
           Positioned(
             bottom: -40, left: -30, // Parte fuera de la pantalla
             child: Image.asset(
               'assets/objeto3.png',
-              width: 300,
+              width: 250,
             ),
           ),
           Positioned(
             bottom: -40, right: -30, // Parte fuera de la pantalla
             child: Image.asset(
               'assets/objeto4.png',
-              width: 300,
+              width: 250,
             ),
           ),
 

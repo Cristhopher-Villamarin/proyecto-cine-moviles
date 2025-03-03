@@ -162,8 +162,8 @@ class _PantallaAsientosState extends State<PantallaAsientos> {
                               },
                               child: Container(
                                 margin: EdgeInsets.all(5),
-                                width: 45,
-                                height: 45,
+                                width: 25,
+                                height: 25,
                                 decoration: BoxDecoration(
                                   color: esOcupado
                                       ? Colors.red // Ocupado (Rojo)

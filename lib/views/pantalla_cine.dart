@@ -162,7 +162,7 @@ class _PantallaCineState extends State<PantallaCine> {
                         child: GridView.builder(
                           padding: EdgeInsets.all(8),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
+                            crossAxisCount: 2,
                             childAspectRatio: 0.55,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,

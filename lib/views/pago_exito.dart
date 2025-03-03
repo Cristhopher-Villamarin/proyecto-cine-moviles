@@ -234,9 +234,7 @@ class PagoExitosoScreen extends StatelessWidget {
       },
     );
   }
-
-  // Función para construir una fila de detalles
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, dynamic value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -251,7 +249,7 @@ class PagoExitosoScreen extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              value,
+              value?.toString() ?? "No disponible", // Si es null, muestra un valor por defecto
               style: TextStyle(
                 fontSize: 16,
               ),
